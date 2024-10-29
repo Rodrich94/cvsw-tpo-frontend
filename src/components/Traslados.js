@@ -16,20 +16,45 @@ const Traslados = () => {
 
     // Función para obtener traslados de la API
     const fetchTraslados = async () => {
-        const response = await axios.get('http://127.0.0.1:5000/traslados');
-        setTraslados(response.data);
+        try{
+            const response = await axios.get('http://127.0.0.1:5000/traslados');
+            setTraslados(response.data);
+        } catch (error) {
+            notification.error({
+                message: 'Error',
+                description: error.response?.data?.error || 'Error al obtener los traslados.',
+            });
+        }
     };
 
     // Función para obtener empleados de la API
     const fetchEmpleados = async () => {
-        const response = await axios.get('http://127.0.0.1:5000/empleados'); // Asegúrate de que esta ruta sea correcta
-        setEmpleados(response.data);
+        try {
+            const response = await axios.get('http://127.0.0.1:5000/empleados'); // Asegúrate de que esta ruta sea correcta
+            setEmpleados(response.data);
+    
+        } catch (error) {
+            notification.error({
+                message: 'Error',
+                description: error.response?.data?.error || 'Error al obtener los empleados.',
+            });
+        }
     };
 
     // Función para obtener servicios de la API
     const fetchServicios = async () => {
-        const response = await axios.get('http://127.0.0.1:5000/servicios'); // Asegúrate de que esta ruta sea correcta
-        setServicios(response.data);
+
+        try {
+            const response = await axios.get('http://127.0.0.1:5000/servicios');
+            setServicios(response.data);
+        } catch (error) {
+            notification.error({
+                message: 'Error',
+                description: error.response?.data?.error || 'Error al obtener los servicios.',
+            });
+        }
+
+
     };
 
     useEffect(() => {
@@ -93,6 +118,31 @@ const Traslados = () => {
         }
     };
 
+
+    const styles = {
+        container: {
+            position: 'relative',
+            padding: '20px',
+            height: '82vh', // Ajusta la altura según el layout
+            backgroundImage: 'url("/fondo-salud.jpg")', // Ruta de la imagen de fondo
+            backgroundSize: 'cover',
+            color: '#fff',
+        },
+        overlay: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.2)', // Color y opacidad del overlay
+            zIndex: 1,
+            padding: '25px',
+        },
+        content: {
+            position: 'relative',
+            zIndex: 2, // Asegura que el contenido esté encima del overlay
+        },
+    };
     const columns = [
         {
             title: 'Origen',
@@ -126,11 +176,13 @@ const Traslados = () => {
     ];
 
     return (
-        <div>
-            <Button type="primary" onClick={() => setIsModalVisible(true)}>
-                Agregar Traslado
-            </Button>
-            <Table dataSource={traslados} columns={columns} rowKey="id" />
+        <div style={styles.container}>
+            <div style={styles.overlay}>
+                <Button type="primary" style={{ margin: '10px 10px 10px 0px' }} onClick={() => setIsModalVisible(true)}>
+                    Agregar Traslado
+                </Button>
+                <Table dataSource={traslados} columns={columns} rowKey="id" />
+            </div>    
 
             {/* Modal para agregar traslado */}
             <Modal

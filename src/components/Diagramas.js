@@ -41,7 +41,7 @@ const Diagramas = () => {
             }
 
             if (fechaInicio) {
-                params.fecha_inicio = fechaInicio.format('YYYY-MM-DD'); // Si utilizas un objeto moment
+                params.fecha_ini = fechaInicio.format('YYYY-MM-DD'); // Si utilizas un objeto moment
             }
 
             if (fechaFin) {
@@ -145,6 +145,31 @@ const Diagramas = () => {
         navigate(`/diagrama/${id}`);
     };
 
+    const styles = {
+        container: {
+            position: 'relative',
+            padding: '20px',
+            height: '82vh', // Ajusta la altura según el layout
+            backgroundImage: 'url("/fondo-salud.jpg")', // Ruta de la imagen de fondo
+            backgroundSize: 'cover',
+            color: '#fff',
+        },
+        overlay: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.2)', // Color y opacidad del overlay
+            zIndex: 1,
+            padding: '25px',
+        },
+        content: {
+            position: 'relative',
+            zIndex: 2, // Asegura que el contenido esté encima del overlay
+        },
+    };
+
     const columns = [
         { title: 'Fecha Inicio', dataIndex: 'fecha_ini', key: 'fecha_ini' },
         { title: 'Fecha Fin', dataIndex: 'fecha_fin', key: 'fecha_fin' },
@@ -163,89 +188,90 @@ const Diagramas = () => {
     ];
 
     return (
-        <div>
-            {/* Filtro por Servicio */}
-            <Select
-                placeholder="Filtrar por Servicio"
-                style={{ width: 200, margin: '15px', padding: '0px', minHeight: '40px' }}
-                onChange={handleServicioChange}
-                allowClear
-            >
-                {servicios.map((servicio) => (
-                    <Option key={servicio.id} value={servicio.id}>
-                        {servicio.establecimiento} - {servicio.nombre}
-                    </Option>
-                ))}
-            </Select>
+        <div style={styles.container}>
+            <div style={styles.overlay}>
+                {/* Filtro por Servicio */}
+                <Select
+                    placeholder="Filtrar por Servicio"
+                    style={{ width: 200, margin: '15px 15px 15px 0px', padding: '0px', minHeight: '40px' }}
+                    onChange={handleServicioChange}
+                    allowClear
+                >
+                    {servicios.map((servicio) => (
+                        <Option key={servicio.id} value={servicio.id}>
+                            {servicio.establecimiento} - {servicio.nombre}
+                        </Option>
+                    ))}
+                </Select>
 
-            {/* Filtro por Estado */}
-            <Select
-                placeholder="Filtrar por Estado"
-                style={{ width: 200, margin: '15px', padding: '0px', minHeight: '40px' }}
-                onChange={handleEstadoChange}
-                allowClear
-            >
-                <Option value="Pendiente">Pendiente</Option>
-                <Option value="Aprobado">Aprobado</Option>
-            </Select>
+                {/* Filtro por Estado */}
+                <Select
+                    placeholder="Filtrar por Estado"
+                    style={{ width: 200, margin: '15px', padding: '0px', minHeight: '40px' }}
+                    onChange={handleEstadoChange}
+                    allowClear
+                >
+                    <Option value="Pendiente">Pendiente</Option>
+                    <Option value="Aprobado">Aprobado</Option>
+                </Select>
 
-            {/* Filtro por Fecha Inicio */}
-            <DatePicker 
-                placeholder="Mayor a:"
-                style={{ margin: '15px', minHeight: '40px' }} 
-                onChange={handleFechaInicioChange}
-            />
+                {/* Filtro por Fecha Inicio */}
+                <DatePicker 
+                    placeholder="Mayor a:"
+                    style={{ margin: '15px', minHeight: '40px' }} 
+                    onChange={handleFechaInicioChange}
+                />
 
-            {/* Filtro por Fecha Fin */}
-            <DatePicker 
-                placeholder="Menor a:"
-                style={{ margin: '15px', minHeight: '40px' }} 
-                onChange={handleFechaFinChange}
-            />
+                {/* Filtro por Fecha Fin */}
+                <DatePicker 
+                    placeholder="Menor a:"
+                    style={{ margin: '15px', minHeight: '40px' }} 
+                    onChange={handleFechaFinChange}
+                />
 
-            {/* Botón para borrar filtros */}
-            <Button type="default" onClick={() => {
-                setSelectedServicio(null);
-                setSelectedEstado(null);
-                setFechaInicio(null);
-                setFechaFin(null);
-            }} style={{ margin: '15px', minHeight: '40px' }}>
-                Borrar Filtros
-            </Button>
-            <Button type="primary" style={{ margin: '15px', minHeight: '40px' }} onClick={() => setIsModalVisible(true)}>Crear Diagrama</Button>
-            <Table dataSource={diagramas} columns={columns} rowKey="id" />
-
-            <Modal
-                title="Agregar Diagrama"
-                visible={isModalVisible}
-                onCancel={() => setIsModalVisible(false)}
-                footer={null}
-            >
-                <Form form={form} onFinish={handleAdd}>
-                    <Form.Item name="estado" label="Estado" rules={[{ required: true }]}>
-                        <Select placeholder="Selecciona un Estado">
-                            <Option value="Pendiente">Pendiente</Option>
-                            <Option value="Aprobado">Aprobado</Option>
-                        </Select>
-                    </Form.Item>
-                    <Form.Item name="fecha_inicio" label="Fecha Inicio" rules={[{ required: true }]}>
-                        <DatePicker />
-                    </Form.Item>
-                    <Form.Item name="fecha_fin" label="Fecha Fin" rules={[{ required: true }]}>
-                        <DatePicker />
-                    </Form.Item>
-                    <Form.Item name="servicio_id" label="ID Servicio" rules={[{ required: true }]}>
-                        <Select placeholder="Selecciona un servicio">
-                            {servicios.map((servicio) => (
-                                <Option key={servicio.id} value={servicio.id}>{servicio.establecimiento} - {servicio.nombre}</Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item>
-                        <Button type="primary" htmlType="submit">Guardar</Button>
-                    </Form.Item>
-                </Form>
-            </Modal>
+                {/* Botón para borrar filtros */}
+                <Button type="default" onClick={() => {
+                    setSelectedServicio(null);
+                    setSelectedEstado(null);
+                    setFechaInicio(null);
+                    setFechaFin(null);
+                }} style={{ margin: '15px', minHeight: '40px' }}>
+                    Borrar Filtros
+                </Button>
+                <Button type="primary" style={{ margin: '15px', minHeight: '40px' }} onClick={() => setIsModalVisible(true)}>Crear Diagrama</Button>
+                <Table dataSource={diagramas} columns={columns} rowKey="id" />
+            </div>    
+                <Modal
+                    title="Agregar Diagrama"
+                    visible={isModalVisible}
+                    onCancel={() => setIsModalVisible(false)}
+                    footer={null}
+                >
+                    <Form form={form} onFinish={handleAdd}>
+                        <Form.Item name="estado" label="Estado" rules={[{ required: true }]}>
+                            <Select placeholder="Selecciona un Estado">
+                                <Option value="Pendiente">Pendiente</Option>
+                                <Option value="Aprobado">Aprobado</Option>
+                            </Select>
+                        </Form.Item>
+                        <Form.Item name="fecha_inicio" label="Fecha Inicio" rules={[{ required: true }]}>
+                            <DatePicker />
+                        </Form.Item>
+                        <Form.Item name="fecha_fin" label="Fecha Fin" rules={[{ required: true }]}>
+                            <DatePicker />
+                        </Form.Item>
+                        <Form.Item name="servicio_id" label="ID Servicio" rules={[{ required: true }]}>
+                            <Select placeholder="Selecciona un servicio">
+                                {servicios.map((servicio) => (
+                                    <Option key={servicio.id} value={servicio.id}>{servicio.establecimiento} - {servicio.nombre}</Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
+                        <Form.Item>
+                            <Button type="primary" htmlType="submit">Guardar</Button>
+                        </Form.Item>
+                    </Form>
+                </Modal>    
         </div>
     );
 };
