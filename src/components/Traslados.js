@@ -30,7 +30,7 @@ const Traslados = () => {
     // Función para obtener empleados de la API
     const fetchEmpleados = async () => {
         try {
-            const response = await axios.get('http://127.0.0.1:5000/empleados'); // Asegúrate de que esta ruta sea correcta
+            const response = await axios.get('http://127.0.0.1:5000/empleados');
             setEmpleados(response.data);
     
         } catch (error) {
@@ -123,7 +123,7 @@ const Traslados = () => {
         container: {
             position: 'relative',
             padding: '20px',
-            height: '82vh', // Ajusta la altura según el layout
+            height: '82vh', 
             backgroundImage: 'url("/fondo-salud.jpg")', // Ruta de la imagen de fondo
             backgroundSize: 'cover',
             color: '#fff',
@@ -140,7 +140,7 @@ const Traslados = () => {
         },
         content: {
             position: 'relative',
-            zIndex: 2, // Asegura que el contenido esté encima del overlay
+            zIndex: 2, 
         },
     };
     const columns = [

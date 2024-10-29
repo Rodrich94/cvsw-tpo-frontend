@@ -6,7 +6,7 @@ import { Breadcrumb, Layout, Menu, theme } from 'antd';
 import Traslados from './components/Traslados'; 
 import Diagramas from './components/Diagramas'; 
 import DetalleDiagrama from './components/DetalleDiagrama';
-import Presentacion from './components/Inicio'; // Importa el nuevo componente
+import Presentacion from './components/Inicio'; 
 
 const { Header, Content, Sider } = Layout;
 
@@ -84,7 +84,7 @@ const App = () => {
               }}
             >
               <Routes>
-                <Route path="/" element={<Presentacion />} /> {/* Usa el componente de presentación */}
+                <Route path="/" element={<Presentacion />} /> 
                 <Route path="/traslados" element={<Traslados />} />
                 <Route path="/diagramas" element={<Diagramas />} />
                 <Route path="/diagrama/:id" element={<DetalleDiagrama />} />

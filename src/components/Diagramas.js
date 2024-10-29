@@ -36,16 +36,16 @@ const Diagramas = () => {
                 params.servicio_id = selectedServicio;
             }
 
-            if (selectedEstado) { // Cambiado de setSelectedEstado a selectedEstado
+            if (selectedEstado) { 
                 params.estado = selectedEstado;
             }
 
             if (fechaInicio) {
-                params.fecha_ini = fechaInicio.format('YYYY-MM-DD'); // Si utilizas un objeto moment
+                params.fecha_ini = fechaInicio.format('YYYY-MM-DD'); 
             }
 
             if (fechaFin) {
-                params.fecha_fin = fechaFin.format('YYYY-MM-DD'); // Si utilizas un objeto moment
+                params.fecha_fin = fechaFin.format('YYYY-MM-DD'); 
             }
 
             const response = await axios.get('http://127.0.0.1:5000/diagramas/filtrados', {
@@ -149,7 +149,7 @@ const Diagramas = () => {
         container: {
             position: 'relative',
             padding: '20px',
-            height: '82vh', // Ajusta la altura según el layout
+            height: '82vh',
             backgroundImage: 'url("/fondo-salud.jpg")', // Ruta de la imagen de fondo
             backgroundSize: 'cover',
             color: '#fff',
@@ -166,7 +166,7 @@ const Diagramas = () => {
         },
         content: {
             position: 'relative',
-            zIndex: 2, // Asegura que el contenido esté encima del overlay
+            zIndex: 2, 
         },
     };
 
