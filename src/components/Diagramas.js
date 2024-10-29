@@ -8,24 +8,99 @@ const { Option } = Select;
 const Diagramas = () => {
     const [diagramas, setDiagramas] = useState([]);
     const [servicios, setServicios] = useState([]);
+    const [selectedServicio, setSelectedServicio] = useState(null);
+    const [selectedEstado, setSelectedEstado] = useState(null);
+    const [fechaInicio, setFechaInicio] = useState(null);
+    const [fechaFin, setFechaFin] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [form] = Form.useForm();
     const navigate = useNavigate();
 
-    const fetchDiagramas = async () => {
-        const response = await axios.get('http://127.0.0.1:5000/diagramas');
-        setDiagramas(response.data);
+    const fetchAllDiagramas = async () => {
+        try {
+            const response = await axios.get('http://127.0.0.1:5000/diagramas');
+            setDiagramas(response.data);
+        } catch (error) {
+            notification.error({
+                message: 'Error',
+                description: error.response?.data?.error || 'Error al obtener los diagramas.',
+            });
+        }
+    };
+
+    const fetchFilteredDiagramas = async () => {
+        try {
+            const params = {};
+            
+            if (selectedServicio) {
+                params.servicio_id = selectedServicio;
+            }
+
+            if (selectedEstado) { // Cambiado de setSelectedEstado a selectedEstado
+                params.estado = selectedEstado;
+            }
+
+            if (fechaInicio) {
+                params.fecha_inicio = fechaInicio.format('YYYY-MM-DD'); // Si utilizas un objeto moment
+            }
+
+            if (fechaFin) {
+                params.fecha_fin = fechaFin.format('YYYY-MM-DD'); // Si utilizas un objeto moment
+            }
+
+            const response = await axios.get('http://127.0.0.1:5000/diagramas/filtrados', {
+                params: params,
+            });
+            
+            setDiagramas(response.data);
+        } catch (error) {
+            notification.error({
+                message: 'Error',
+                description: error.response?.data?.error || 'Error al obtener los diagramas filtrados.',
+            });
+        }
     };
 
     const fetchServicios = async () => {
-        const response = await axios.get('http://127.0.0.1:5000/servicios');
-        setServicios(response.data);
+        try {
+            const response = await axios.get('http://127.0.0.1:5000/servicios');
+            setServicios(response.data);
+        } catch (error) {
+            notification.error({
+                message: 'Error',
+                description: error.response?.data?.error || 'Error al obtener los servicios.',
+            });
+        }
     };
 
     useEffect(() => {
-        fetchDiagramas();
-        fetchServicios();
+        fetchServicios(); // Obtén servicios solo una vez
+        fetchAllDiagramas(); // Obtén todos los diagramas al cargar el componente
     }, []);
+
+    useEffect(() => {
+        if (selectedServicio || selectedEstado || fechaInicio || fechaFin) {
+            fetchFilteredDiagramas(); // Obtén diagramas filtrados si hay algún filtro aplicado
+        } else {
+            fetchAllDiagramas(); // Si no hay filtros, obtén todos los diagramas
+        }
+    }, [selectedServicio, selectedEstado, fechaInicio, fechaFin]);
+
+    const handleServicioChange = (value) => {
+        setSelectedServicio(value); // Actualiza el estado con el servicio seleccionado
+    };
+
+    const handleEstadoChange = (value) => {
+        setSelectedEstado(value); // Actualiza el estado con el estado seleccionado
+    };
+
+    const handleFechaInicioChange = (date) => {
+        setFechaInicio(date); // Actualiza el estado con la fecha de inicio seleccionada
+    };
+
+    const handleFechaFinChange = (date) => {
+        setFechaFin(date); // Actualiza el estado con la fecha de fin seleccionada
+    };
 
     const handleAdd = async (values) => {
         try {
@@ -35,7 +110,7 @@ const Diagramas = () => {
                 fecha_fin: values.fecha_fin.format('YYYY-MM-DD'),
                 servicio_id: values.servicio_id,
             });
-            fetchDiagramas();
+            fetchAllDiagramas(); // Vuelve a obtener todos los diagramas después de agregar uno nuevo
             setIsModalVisible(false);
             form.resetFields();
             notification.success({
@@ -53,7 +128,7 @@ const Diagramas = () => {
     const handleDelete = async (id) => {
         try {
             await axios.delete(`http://127.0.0.1:5000/diagrama/${id}`);
-            fetchDiagramas();
+            fetchAllDiagramas(); // Vuelve a obtener todos los diagramas después de eliminar uno
             notification.success({
                 message: 'Diagrama eliminado',
                 description: `El Diagrama con ID ${id} se ha eliminado exitosamente.`,
@@ -89,7 +164,55 @@ const Diagramas = () => {
 
     return (
         <div>
-            <Button type="primary" onClick={() => setIsModalVisible(true)}>Crear Diagrama</Button>
+            {/* Filtro por Servicio */}
+            <Select
+                placeholder="Filtrar por Servicio"
+                style={{ width: 200, margin: '15px', padding: '0px', minHeight: '40px' }}
+                onChange={handleServicioChange}
+                allowClear
+            >
+                {servicios.map((servicio) => (
+                    <Option key={servicio.id} value={servicio.id}>
+                        {servicio.establecimiento} - {servicio.nombre}
+                    </Option>
+                ))}
+            </Select>
+
+            {/* Filtro por Estado */}
+            <Select
+                placeholder="Filtrar por Estado"
+                style={{ width: 200, margin: '15px', padding: '0px', minHeight: '40px' }}
+                onChange={handleEstadoChange}
+                allowClear
+            >
+                <Option value="Pendiente">Pendiente</Option>
+                <Option value="Aprobado">Aprobado</Option>
+            </Select>
+
+            {/* Filtro por Fecha Inicio */}
+            <DatePicker 
+                placeholder="Mayor a:"
+                style={{ margin: '15px', minHeight: '40px' }} 
+                onChange={handleFechaInicioChange}
+            />
+
+            {/* Filtro por Fecha Fin */}
+            <DatePicker 
+                placeholder="Menor a:"
+                style={{ margin: '15px', minHeight: '40px' }} 
+                onChange={handleFechaFinChange}
+            />
+
+            {/* Botón para borrar filtros */}
+            <Button type="default" onClick={() => {
+                setSelectedServicio(null);
+                setSelectedEstado(null);
+                setFechaInicio(null);
+                setFechaFin(null);
+            }} style={{ margin: '15px', minHeight: '40px' }}>
+                Borrar Filtros
+            </Button>
+            <Button type="primary" style={{ margin: '15px', minHeight: '40px' }} onClick={() => setIsModalVisible(true)}>Crear Diagrama</Button>
             <Table dataSource={diagramas} columns={columns} rowKey="id" />
 
             <Modal
