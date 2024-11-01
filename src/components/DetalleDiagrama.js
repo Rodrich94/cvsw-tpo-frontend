@@ -34,7 +34,6 @@ const DetalleDiagrama = () => {
 
             {diagrama && (
                 <Card title={`Diagrama ID: ${diagrama.id}`}>
-                    <p><strong>Estado:</strong> {diagrama.estado}</p>
                     <p><strong>Fecha de Inicio:</strong> {diagrama.fecha_ini}</p>
                     <p><strong>Fecha de Fin:</strong> {diagrama.fecha_fin}</p>
                     <p><strong>Servicio:</strong> {diagrama.servicio}</p>
@@ -45,7 +44,6 @@ const DetalleDiagrama = () => {
                                 diagrama.actividades_extraordinarias.map((actividad) => (
                                     <div key={actividad.id} style={{ marginBottom: '10px' }}>
                                         <p><strong>Actividad numero:</strong> {actividad.id}</p>
-                                        <p><strong>Estado:</strong> {actividad.estado}</p>
                                         <p><strong>Fecha de Inicio:</strong> {actividad.fecha_ini}</p>
                                         <p><strong>Fecha de Fin:</strong> {actividad.fecha_fin}</p>
                                         <p><strong>Empleado:</strong> {actividad.nombre_empleado} {actividad.apellido_empleado} (Legajo: {actividad.legajo_empleado})</p>

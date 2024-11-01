@@ -145,6 +145,13 @@ const Traslados = () => {
     };
     const columns = [
         {
+            title: 'Empleado',
+            key: 'empleado_id',
+            render: (_, record) => (
+                `${record.actividad.nombre_empleado} ${record.actividad.apellido_empleado}`
+            )
+        },
+        {
             title: 'Origen',
             dataIndex: 'origen',
             key: 'origen',
@@ -182,6 +189,7 @@ const Traslados = () => {
                     Agregar Traslado
                 </Button>
                 <Table dataSource={traslados} columns={columns} rowKey="id" />
+                
             </div>    
 
             {/* Modal para agregar traslado */}
@@ -249,8 +257,8 @@ const Traslados = () => {
                         <p><strong>Origen:</strong> {selectedTraslado.origen}</p>
                         <p><strong>Destino:</strong> {selectedTraslado.destino}</p>
                         <p><strong>Tramo:</strong> {selectedTraslado.tramo}</p>
-                        <p><strong>Fecha de Inicio:</strong> {selectedTraslado.actividad.fecha_ini}</p>
-                        <p><strong>Fecha de Fin:</strong> {selectedTraslado.actividad.fecha_fin}</p>
+                        <p><strong>Fecha de Inicio:</strong> {moment(selectedTraslado.actividad.fecha_ini).format('DD/MM/YYYY')}</p>
+                        <p><strong>Fecha de Fin:</strong> {moment(selectedTraslado.actividad.fecha_fin).format('DD/MM/YYYY')}</p>
                         <p><strong>Empleado:</strong> {selectedTraslado.actividad.nombre_empleado} {selectedTraslado.actividad.apellido_empleado}</p>
                         <p><strong>Servicio:</strong> {selectedTraslado.actividad.servicio_id}</p>
                     </div>

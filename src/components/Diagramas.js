@@ -9,7 +9,6 @@ const Diagramas = () => {
     const [diagramas, setDiagramas] = useState([]);
     const [servicios, setServicios] = useState([]);
     const [selectedServicio, setSelectedServicio] = useState(null);
-    const [selectedEstado, setSelectedEstado] = useState(null);
     const [fechaInicio, setFechaInicio] = useState(null);
     const [fechaFin, setFechaFin] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -36,9 +35,6 @@ const Diagramas = () => {
                 params.servicio_id = selectedServicio;
             }
 
-            if (selectedEstado) { 
-                params.estado = selectedEstado;
-            }
 
             if (fechaInicio) {
                 params.fecha_ini = fechaInicio.format('YYYY-MM-DD'); 
@@ -79,20 +75,17 @@ const Diagramas = () => {
     }, []);
 
     useEffect(() => {
-        if (selectedServicio || selectedEstado || fechaInicio || fechaFin) {
+        if (selectedServicio || fechaInicio || fechaFin) {
             fetchFilteredDiagramas(); // Obtén diagramas filtrados si hay algún filtro aplicado
         } else {
             fetchAllDiagramas(); // Si no hay filtros, obtén todos los diagramas
         }
-    }, [selectedServicio, selectedEstado, fechaInicio, fechaFin]);
+    }, [selectedServicio, fechaInicio, fechaFin]);
 
     const handleServicioChange = (value) => {
         setSelectedServicio(value); // Actualiza el estado con el servicio seleccionado
     };
 
-    const handleEstadoChange = (value) => {
-        setSelectedEstado(value); // Actualiza el estado con el estado seleccionado
-    };
 
     const handleFechaInicioChange = (date) => {
         setFechaInicio(date); // Actualiza el estado con la fecha de inicio seleccionada
@@ -105,7 +98,6 @@ const Diagramas = () => {
     const handleAdd = async (values) => {
         try {
             await axios.post('http://127.0.0.1:5000/diagrama', {
-                estado: values.estado,
                 fecha_inicio: values.fecha_inicio.format('YYYY-MM-DD'),
                 fecha_fin: values.fecha_fin.format('YYYY-MM-DD'),
                 servicio_id: values.servicio_id,
@@ -173,7 +165,6 @@ const Diagramas = () => {
     const columns = [
         { title: 'Fecha Inicio', dataIndex: 'fecha_ini', key: 'fecha_ini' },
         { title: 'Fecha Fin', dataIndex: 'fecha_fin', key: 'fecha_fin' },
-        { title: 'Estado', dataIndex: 'estado', key: 'estado' },
         { title: 'Servicio', dataIndex: 'servicio', key: 'servicio' },
         {
             title: 'Acciones',
@@ -204,17 +195,6 @@ const Diagramas = () => {
                     ))}
                 </Select>
 
-                {/* Filtro por Estado */}
-                <Select
-                    placeholder="Filtrar por Estado"
-                    style={{ width: 200, margin: '15px', padding: '0px', minHeight: '40px' }}
-                    onChange={handleEstadoChange}
-                    allowClear
-                >
-                    <Option value="Pendiente">Pendiente</Option>
-                    <Option value="Aprobado">Aprobado</Option>
-                </Select>
-
                 {/* Filtro por Fecha Inicio */}
                 <DatePicker 
                     placeholder="Mayor a:"
@@ -232,7 +212,6 @@ const Diagramas = () => {
                 {/* Botón para borrar filtros */}
                 <Button type="default" onClick={() => {
                     setSelectedServicio(null);
-                    setSelectedEstado(null);
                     setFechaInicio(null);
                     setFechaFin(null);
                 }} style={{ margin: '15px', minHeight: '40px' }}>
@@ -241,37 +220,39 @@ const Diagramas = () => {
                 <Button type="primary" style={{ margin: '15px', minHeight: '40px' }} onClick={() => setIsModalVisible(true)}>Crear Diagrama</Button>
                 <Table dataSource={diagramas} columns={columns} rowKey="id" />
             </div>    
-                <Modal
-                    title="Agregar Diagrama"
-                    visible={isModalVisible}
-                    onCancel={() => setIsModalVisible(false)}
-                    footer={null}
-                >
-                    <Form form={form} onFinish={handleAdd}>
-                        <Form.Item name="estado" label="Estado" rules={[{ required: true }]}>
-                            <Select placeholder="Selecciona un Estado">
-                                <Option value="Pendiente">Pendiente</Option>
-                                <Option value="Aprobado">Aprobado</Option>
-                            </Select>
-                        </Form.Item>
-                        <Form.Item name="fecha_inicio" label="Fecha Inicio" rules={[{ required: true }]}>
-                            <DatePicker />
-                        </Form.Item>
-                        <Form.Item name="fecha_fin" label="Fecha Fin" rules={[{ required: true }]}>
-                            <DatePicker />
-                        </Form.Item>
-                        <Form.Item name="servicio_id" label="ID Servicio" rules={[{ required: true }]}>
-                            <Select placeholder="Selecciona un servicio">
-                                {servicios.map((servicio) => (
-                                    <Option key={servicio.id} value={servicio.id}>{servicio.establecimiento} - {servicio.nombre}</Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                        <Form.Item>
-                            <Button type="primary" htmlType="submit">Guardar</Button>
-                        </Form.Item>
-                    </Form>
-                </Modal>    
+            <Modal
+                title="Agregar Diagrama"
+                visible={isModalVisible}
+                onCancel={() => setIsModalVisible(false)}
+                footer={null}
+            >
+                <Form form={form} onFinish={handleAdd}>
+                    {/* Campo para seleccionar el año */}
+                    <Form.Item name="anio" label="Año" rules={[{ required: true }]}>
+                        <DatePicker picker="year" placeholder="Selecciona el año" />
+                    </Form.Item>
+
+                    {/* Campo para seleccionar el mes */}
+                    <Form.Item name="mes" label="Mes" rules={[{ required: true }]}>
+                        <DatePicker picker="month" placeholder="Selecciona el mes" />
+                    </Form.Item>
+
+                    {/* Campo para seleccionar el servicio */}
+                    <Form.Item name="servicio_id" label="ID Servicio" rules={[{ required: true }]}>
+                        <Select placeholder="Selecciona un servicio">
+                            {servicios.map((servicio) => (
+                                <Option key={servicio.id} value={servicio.id}>{servicio.establecimiento} - {servicio.nombre}</Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+
+                    {/* Botón de guardar */}
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit">Guardar</Button>
+                    </Form.Item>
+                </Form>
+            </Modal>
+    
         </div>
     );
 };
