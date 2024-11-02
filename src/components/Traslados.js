@@ -9,14 +9,14 @@ const Traslados = () => {
     const [traslados, setTraslados] = useState([]);
     const [empleados, setEmpleados] = useState([]);
     const [servicios, setServicios] = useState([]);
+    const [establecimientos, setEstablecimientos] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
-    const [selectedTraslado, setSelectedTraslado] = useState(null); // Para el traslado seleccionado
+    const [selectedTraslado, setSelectedTraslado] = useState(null);
     const [form] = Form.useForm();
 
-    // Función para obtener traslados de la API
     const fetchTraslados = async () => {
-        try{
+        try {
             const response = await axios.get('http://127.0.0.1:5000/traslados');
             setTraslados(response.data);
         } catch (error) {
@@ -27,12 +27,34 @@ const Traslados = () => {
         }
     };
 
-    // Función para obtener empleados de la API
-    const fetchEmpleados = async () => {
+    const fetchEstablecimientos = async () => {
         try {
-            const response = await axios.get('http://127.0.0.1:5000/empleados');
+            const response = await axios.get('http://127.0.0.1:5000/establecimientos');
+            setEstablecimientos(response.data);
+        } catch (error) {
+            notification.error({
+                message: 'Error',
+                description: error.response?.data?.error || 'Error al obtener los establecimientos.',
+            });
+        }
+    };
+
+    const fetchServiciosPorEstablecimiento = async (establecimientoId) => {
+        try {
+            const response = await axios.get(`http://127.0.0.1:5000//servicios/establecimiento/${establecimientoId}`);
+            setServicios(response.data);
+        } catch (error) {
+            notification.error({
+                message: 'Error',
+                description: error.response?.data?.error || 'Error al obtener los servicios.',
+            });
+        }
+    };
+
+    const fetchEmpleadosPorServicio = async (servicioId) => {
+        try {
+            const response = await axios.get(`http://127.0.0.1:5000/servicios/${servicioId}/empleados`);
             setEmpleados(response.data);
-    
         } catch (error) {
             notification.error({
                 message: 'Error',
@@ -41,26 +63,9 @@ const Traslados = () => {
         }
     };
 
-    // Función para obtener servicios de la API
-    const fetchServicios = async () => {
-
-        try {
-            const response = await axios.get('http://127.0.0.1:5000/servicios');
-            setServicios(response.data);
-        } catch (error) {
-            notification.error({
-                message: 'Error',
-                description: error.response?.data?.error || 'Error al obtener los servicios.',
-            });
-        }
-
-
-    };
-
     useEffect(() => {
         fetchTraslados();
-        fetchEmpleados();
-        fetchServicios();
+        fetchEstablecimientos();
     }, []);
 
     const handleAdd = async (values) => {
@@ -108,8 +113,8 @@ const Traslados = () => {
     const handleView = async (id) => {
         try {
             const response = await axios.get(`http://127.0.0.1:5000/traslado/${id}`);
-            setSelectedTraslado(response.data);  // Guardar el traslado seleccionado
-            setIsDetailModalVisible(true);      // Mostrar el modal con los detalles
+            setSelectedTraslado(response.data);
+            setIsDetailModalVisible(true);
         } catch (error) {
             notification.error({
                 message: 'Error',
@@ -118,13 +123,12 @@ const Traslados = () => {
         }
     };
 
-
     const styles = {
         container: {
             position: 'relative',
             padding: '20px',
-            height: '82vh', 
-            backgroundImage: 'url("/fondo-salud.jpg")', // Ruta de la imagen de fondo
+            height: '82vh',
+            backgroundImage: 'url("/fondo-salud.jpg")',
             backgroundSize: 'cover',
             color: '#fff',
         },
@@ -134,15 +138,16 @@ const Traslados = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.2)', // Color y opacidad del overlay
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
             zIndex: 1,
             padding: '25px',
         },
         content: {
             position: 'relative',
-            zIndex: 2, 
+            zIndex: 2,
         },
     };
+
     const columns = [
         {
             title: 'Empleado',
@@ -189,10 +194,8 @@ const Traslados = () => {
                     Agregar Traslado
                 </Button>
                 <Table dataSource={traslados} columns={columns} rowKey="id" />
-                
             </div>    
 
-            {/* Modal para agregar traslado */}
             <Modal
                 title="Agregar Traslado"
                 visible={isModalVisible}
@@ -219,20 +222,35 @@ const Traslados = () => {
                     <Form.Item name="fecha_fin" label="Fecha Fin" rules={[{ required: true }]}>
                         <DatePicker />
                     </Form.Item>
+                    <Form.Item name="establecimiento_id" label="Establecimiento" rules={[{ required: true }]}>
+                        <Select
+                            placeholder="Selecciona un establecimiento"
+                            onChange={(value) => fetchServiciosPorEstablecimiento(value)}
+                        >
+                            {establecimientos.map((establecimiento) => (
+                                <Option key={establecimiento.id} value={establecimiento.id}>
+                                    {establecimiento.nombre}
+                                </Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item name="servicio_id" label="Servicio" rules={[{ required: true }]}>
+                        <Select
+                            placeholder="Selecciona un servicio"
+                            onChange={(value) => fetchEmpleadosPorServicio(value)}
+                        >
+                            {servicios.map((servicio) => (
+                                <Option key={servicio.id} value={servicio.id}>
+                                    {servicio.nombre}
+                                </Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
                     <Form.Item name="empleado_id" label="Empleado" rules={[{ required: true }]}>
                         <Select placeholder="Selecciona un empleado">
                             {empleados.map((empleado) => (
                                 <Option key={empleado.legajo} value={empleado.legajo}>
                                     {empleado.nombre} {empleado.apellido}
-                                </Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item name="servicio_id" label="ID Servicio" rules={[{ required: true }]}>
-                        <Select placeholder="Selecciona un servicio">
-                            {servicios.map((servicio) => (
-                                <Option key={servicio.id} value={servicio.id}>
-                                    {servicio.establecimiento} - {servicio.nombre}
                                 </Option>
                             ))}
                         </Select>
@@ -245,7 +263,6 @@ const Traslados = () => {
                 </Form>
             </Modal>
 
-            {/* Modal para ver los detalles del traslado */}
             <Modal
                 title="Detalles del Traslado"
                 visible={isDetailModalVisible}
@@ -257,9 +274,10 @@ const Traslados = () => {
                         <p><strong>Origen:</strong> {selectedTraslado.origen}</p>
                         <p><strong>Destino:</strong> {selectedTraslado.destino}</p>
                         <p><strong>Tramo:</strong> {selectedTraslado.tramo}</p>
-                        <p><strong>Fecha de Inicio:</strong> {moment(selectedTraslado.actividad.fecha_ini).format('DD/MM/YYYY')}</p>
-                        <p><strong>Fecha de Fin:</strong> {moment(selectedTraslado.actividad.fecha_fin).format('DD/MM/YYYY')}</p>
+                        <p><strong>Fecha Inicio:</strong> {moment(selectedTraslado.fecha_inicio).format('YYYY-MM-DD')}</p>
+                        <p><strong>Fecha Fin:</strong> {moment(selectedTraslado.fecha_fin).format('YYYY-MM-DD')}</p>
                         <p><strong>Empleado:</strong> {selectedTraslado.actividad.nombre_empleado} {selectedTraslado.actividad.apellido_empleado}</p>
+                        <p><strong>Establecimiento:</strong> {selectedTraslado.actividad.establecimiento}</p>
                         <p><strong>Servicio:</strong> {selectedTraslado.actividad.servicio_id}</p>
                     </div>
                 )}
