@@ -44,6 +44,7 @@ const DetalleDiagrama = () => {
                                 diagrama.actividades_extraordinarias.map((actividad) => (
                                     <div key={actividad.id} style={{ marginBottom: '10px' }}>
                                         <p><strong>Actividad numero:</strong> {actividad.id}</p>
+                                        <p><strong>Actividad numero:</strong> {actividad.tipo_actividad}</p>
                                         <p><strong>Fecha de Inicio:</strong> {actividad.fecha_ini}</p>
                                         <p><strong>Fecha de Fin:</strong> {actividad.fecha_fin}</p>
                                         <p><strong>Empleado:</strong> {actividad.nombre_empleado} {actividad.apellido_empleado} (Legajo: {actividad.legajo_empleado})</p>

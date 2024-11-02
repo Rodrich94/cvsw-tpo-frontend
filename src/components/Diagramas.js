@@ -97,14 +97,21 @@ const Diagramas = () => {
 
     const handleAdd = async (values) => {
         try {
+            // Extraer año y mes del picker y convertirlos a números
+            const anio = values.anio.year();
+            const mes = values.mes.month() + 1; // Los meses en DatePicker empiezan en 0, así que sumamos 1
+    
             await axios.post('http://127.0.0.1:5000/diagrama', {
-                fecha_inicio: values.fecha_inicio.format('YYYY-MM-DD'),
-                fecha_fin: values.fecha_fin.format('YYYY-MM-DD'),
+                anio: anio,
+                mes: mes,
                 servicio_id: values.servicio_id,
             });
-            fetchAllDiagramas(); // Vuelve a obtener todos los diagramas después de agregar uno nuevo
+    
+            // Vuelve a obtener todos los diagramas después de agregar uno nuevo
+            fetchAllDiagramas();
             setIsModalVisible(false);
             form.resetFields();
+    
             notification.success({
                 message: 'Diagrama creado',
                 description: 'El diagrama se ha creado exitosamente.',
@@ -166,6 +173,15 @@ const Diagramas = () => {
         { title: 'Fecha Inicio', dataIndex: 'fecha_ini', key: 'fecha_ini' },
         { title: 'Fecha Fin', dataIndex: 'fecha_fin', key: 'fecha_fin' },
         { title: 'Servicio', dataIndex: 'servicio', key: 'servicio' },
+        { 
+            title: 'Tipo actividad', 
+            key: 'tipo_actividad',
+            render: (_, record) => (
+                record.actividades_extraordinarias.length > 0 
+                    ? record.actividades_extraordinarias[0].tipo_actividad 
+                    : 'N/A'
+            )
+        },
         {
             title: 'Acciones',
             key: 'acciones',
