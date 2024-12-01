@@ -205,9 +205,14 @@ const Guardias = () => {
             render: (_, record) => (<EstadoTag estado={record.estado} />),
         },
         {
-            title: 'Fecha',
+            title: 'Fecha inicio',
             key: 'fechaInicio',
             render: (_, record) => (`${moment(record.fechaInicio).format('DD/MM/YYYY')}`),
+        },
+        {
+            title: 'Fecha fin',
+            key: 'fechaFin',
+            render: (_, record) => (`${moment(record.fechaFin).format('DD/MM/YYYY')}`),
         },
         /*{
             title: 'Acciones',
