@@ -35,6 +35,7 @@ const Guardias = () => {
     const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
     const [selectedGuardia, setSelectedGuardia] = useState(null);
     const [periodo, setPeriodo] = useState([]);
+    const [guardiasForm, setGuardiasForm] = useState([{ key: 0, fecha_ini: '', fecha_fin: '', duracion: 24 }]);
     const [form] = Form.useForm();
 
     const fetchGuardias = async () => {
@@ -86,14 +87,47 @@ const Guardias = () => {
     };
 
     const handleAdd = async (values) => {
-        values.periodo = periodo;
-        console.log(values);
+        const datos = { ...values, periodo: periodo, guardias: guardiasForm };
+        console.log(datos);
+        try {
+            await axios.post('http://127.0.0.1:5000/guardia/empleado', datos);
+            fetchGuardias();
+            setIsModalVisible(false);
+            form.resetFields();
+            setGuardiasForm([{ key: 0, fecha_ini: '', fecha_fin: '', duracion: 24 }]);
+            notification.success({
+                message: 'Guardias creadas',
+                description: 'Las guardias fueron creadas correctamente.',
+            });
+        } catch (error) {
+            notification.error({
+                message: 'Error',
+                description: error.response?.data?.error || 'Error al agregar las guardias.',
+            });
+        }
     };
 
     const handleDelete = async (id) => {
     };
 
     const handleView = async (id) => {
+    };
+
+    const handleMasGuardias = () => {
+        setGuardiasForm([
+            ...guardiasForm,
+            {
+                key: guardiasForm.length,
+                fecha_ini: '',
+                fecha_fin: '',
+                duracion: 24
+            },
+        ]);
+    };
+
+    const handleMenosGuardias = (rowId) => {
+        guardiasForm.pop(rowId);
+        setGuardiasForm([...guardiasForm]);
     };
 
     const handlePeriodo = (_, fecha) => {
@@ -191,6 +225,57 @@ const Guardias = () => {
         },*/
     ];
 
+    const colsFormGuardias = [
+        {
+            title: 'Inicio',
+            key: 'fecha_ini',
+            render: (_, record) => (
+                <Form.Item rules={[{ required: true }]}>
+                    <DatePicker onChange={(_, value) => {
+                        guardiasForm[record.key].fecha_ini = moment(value).format('YYYY-MM-DD');
+                        setGuardiasForm([...guardiasForm]);
+                    }} defaultValue={record.fecha_ini} />
+                </Form.Item>
+            ),
+        },
+        {
+            title: 'Fin',
+            key: 'fecha_fin',
+            render: (_, record) => (
+                <Form.Item rules={[{ required: true }]}>
+                <DatePicker onChange={(_, value) => {
+                    guardiasForm[record.key].fecha_fin = moment(value).format('YYYY-MM-DD');
+                    setGuardiasForm([...guardiasForm]);
+                }} defaultValue={record.fecha_fin} />
+                </Form.Item>
+            ),
+        },
+        {
+            title: 'Duración',
+            key: 'duracion',
+            render: (_, record) => (
+                <Form.Item rules={[{ required: true }]}>
+                    <Select placeholder="Selecciona un tipo" defaultValue={record.duracion} onChange={(value) => {
+                        guardiasForm[record.key].duracion = value;
+                        setGuardiasForm([...guardiasForm]);
+                    }}>
+                        <Option value={12}>12 hs</Option>
+                        <Option value={24}>24 hs</Option>
+                    </Select>
+                </Form.Item>
+            ),
+        },
+        {
+            title: 'Acciones',
+            key: 'acciones',
+            render: (_, record) => (
+                <Button danger onClick={() => handleMenosGuardias(record.key)} icon={<DeleteOutlined />}>
+                    Eliminar
+                </Button>
+            ),
+        }
+    ];
+
     useEffect(() => {
         fetchGuardias();
         fetchEstablecimientos();
@@ -210,8 +295,9 @@ const Guardias = () => {
                 visible={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
                 footer={null}
+                width={800}
             >
-            <Form form={form} onFinish={handleAdd} {...formLayout}>
+                <Form form={form} onFinish={handleAdd} {...formLayout}>
 
                     {/* Selección de establecimiento */}
                     <Form.Item name="establecimiento_id" label="Establecimiento" rules={[{ required: true }]}>
@@ -242,6 +328,15 @@ const Guardias = () => {
                     </Form.Item>
 
                     {/* Datos del empleado y tipo de guardias a cargar */}
+                    <Form.Item name="legajo_empleado" label="Empleado" rules={[{ required: true }]}>
+                        <Select placeholder="Selecciona un empleado">
+                            {empleados.map((empleado) => (
+                                <Option key={empleado.legajo} value={empleado.legajo}>
+                                    {empleado.nombre} {empleado.apellido}
+                                </Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
                     <Form.Item name="tipo" label="Tipo" rules={[{ required: true }]}>
                         <Select placeholder="Selecciona un tipo">
                             <Option value={'Activa'}>Activa</Option>
@@ -260,18 +355,8 @@ const Guardias = () => {
                     </Text>
 
                     {/* TODO: Guardias a cargar */}
-                    <Form.Item name="duracion" label="Duración" rules={[{ required: true }]}>
-                        <Select placeholder="Selecciona un tipo">
-                            <Option value={12}>12 hs</Option>
-                            <Option value={24}>24 hs</Option>
-                        </Select>
-                    </Form.Item>
-                    <Form.Item name="fecha_ini" label="Fecha de inicio" rules={[{ required: true }]}>
-                        <DatePicker />
-                    </Form.Item>
-                    <Form.Item name="fecha_fin" label="Fecha de finalización" rules={[{ required: true }]}>
-                        <DatePicker />
-                    </Form.Item>
+                    <Table dataSource={guardiasForm} columns={colsFormGuardias} rowKey="key" />
+                    <Button type="primary" onClick={handleMasGuardias}>Agregar más</Button>
 
                     <Form.Item>
                         <Button type="primary" htmlType="submit">
