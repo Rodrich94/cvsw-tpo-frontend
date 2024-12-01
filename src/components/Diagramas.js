@@ -204,6 +204,14 @@ const Diagramas = () => {
                 <Spin size="large" style={{ display: 'block', margin: '0 auto', marginTop: '20px' }} />
             ) : (
                 <>
+                    <Button
+                        type="primary"
+                        onClick={() => setIsModalVisible(true)}
+                        style={{ marginRight: '20px', padding:'20px'}}
+                    >
+                        Crear Diagrama
+                    </Button>
+
                     <Select
                         placeholder="Seleccionar Establecimiento"
                         style={{ width: 200, margin: '15px 15px 15px 0px', minHeight: '40px' }}
@@ -249,7 +257,7 @@ const Diagramas = () => {
                         value={selectedAnio ? moment().year(selectedAnio) : null}
                     />
 
-                    <Button type="primary" onClick={handleApplyFilters} style={{ margin: '15px' }}>
+                    <Button type="primary" onClick={handleApplyFilters} style={{ margin: '15px', backgroundColor:'green'}}>
                         Filtrar
                     </Button>
 
@@ -263,14 +271,6 @@ const Diagramas = () => {
                         dataSource={diagramas}
                         pagination={{ pageSize: 10 }}
                     />
-
-                    <Button
-                        type="primary"
-                        onClick={() => setIsModalVisible(true)}
-                        style={{ marginTop: '20px' }}
-                    >
-                        Crear Diagrama
-                    </Button>
 
                     <Modal
                         title="Crear Diagrama"
