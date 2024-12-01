@@ -88,13 +88,13 @@ const Guardias = () => {
 
     const handleAdd = async (values) => {
         const datos = { ...values, periodo: periodo, guardias: guardiasForm };
-        console.log(datos);
         try {
             await axios.post('http://127.0.0.1:5000/guardia/empleado', datos);
             fetchGuardias();
             setIsModalVisible(false);
-            form.resetFields();
+            setPeriodo([]);
             setGuardiasForm([{ key: 0, fecha_ini: '', fecha_fin: '', duracion: 24 }]);
+            form.resetFields();
             notification.success({
                 message: 'Guardias creadas',
                 description: 'Las guardias fueron creadas correctamente.',
@@ -243,10 +243,10 @@ const Guardias = () => {
             key: 'fecha_fin',
             render: (_, record) => (
                 <Form.Item rules={[{ required: true }]}>
-                <DatePicker onChange={(_, value) => {
-                    guardiasForm[record.key].fecha_fin = moment(value).format('YYYY-MM-DD');
-                    setGuardiasForm([...guardiasForm]);
-                }} defaultValue={record.fecha_fin} />
+                    <DatePicker onChange={(_, value) => {
+                        guardiasForm[record.key].fecha_fin = moment(value).format('YYYY-MM-DD');
+                        setGuardiasForm([...guardiasForm]);
+                    }} defaultValue={record.fecha_fin} />
                 </Form.Item>
             ),
         },
@@ -269,9 +269,11 @@ const Guardias = () => {
             title: 'Acciones',
             key: 'acciones',
             render: (_, record) => (
-                <Button danger onClick={() => handleMenosGuardias(record.key)} icon={<DeleteOutlined />}>
-                    Eliminar
-                </Button>
+                <Form.Item>
+                    <Button danger onClick={() => handleMenosGuardias(record.key)} icon={<DeleteOutlined />}>
+                        Quitar
+                    </Button>
+                </Form.Item>
             ),
         }
     ];
@@ -346,17 +348,19 @@ const Guardias = () => {
                     <Form.Item name="periodo" label="Periodo" rules={[{ required: true }]}>
                         <DatePicker picker="month" onChange={handlePeriodo} />
                     </Form.Item>
-                    <Text italic type="secondary">
-                        {periodo.length == 2 ?
-                            `Desde el ${moment(periodo[0]).format('DD/MM/YY')} ` +
-                            `hasta el ${moment(periodo[1]).format('DD/MM/YY')}` :
-                            ''
-                        }
-                    </Text>
 
-                    {/* TODO: Guardias a cargar */}
+                    {/* Guardias a cargar */}
+                    <Flex gap="middle">
+                        <Button type="primary" onClick={handleMasGuardias}>Agregar más</Button>
+                        <Text italic type="secondary">
+                            {periodo.length == 2 ?
+                                `Desde el ${moment(periodo[0]).format('DD/MM/YY')} ` +
+                                `hasta el ${moment(periodo[1]).format('DD/MM/YY')}` :
+                                ''
+                            }
+                        </Text>
+                    </Flex>
                     <Table dataSource={guardiasForm} columns={colsFormGuardias} rowKey="key" />
-                    <Button type="primary" onClick={handleMasGuardias}>Agregar más</Button>
 
                     <Form.Item>
                         <Button type="primary" htmlType="submit">
