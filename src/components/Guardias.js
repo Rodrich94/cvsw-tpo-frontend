@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Flex, Rate, Table, Tag, Button, Modal, Form, Input, DatePicker, Select, Typography, notification } from 'antd';
-import { ClockCircleOutlined, DeleteOutlined, MedicineBoxOutlined, PlusOutlined, SolutionOutlined } from '@ant-design/icons';
+import { Flex, Rate, Table, Tag, Button, Modal, Form, DatePicker, Select, Typography, notification } from 'antd';
+import { ClockCircleOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import moment from 'moment';
 
@@ -32,8 +32,6 @@ const Guardias = () => {
     const [servicios, setServicios] = useState([]);
     const [establecimientos, setEstablecimientos] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
-    const [selectedGuardia, setSelectedGuardia] = useState(null);
     const [periodo, setPeriodo] = useState([]);
     const [guardiasForm, setGuardiasForm] = useState([{ key: 0, fecha_ini: '', fecha_fin: '', duracion: 24 }]);
     const [form] = Form.useForm();
@@ -105,12 +103,6 @@ const Guardias = () => {
                 description: error.response?.data?.error || 'Error al agregar las guardias.',
             });
         }
-    };
-
-    const handleDelete = async (id) => {
-    };
-
-    const handleView = async (id) => {
     };
 
     const handleMasGuardias = () => {
@@ -214,20 +206,6 @@ const Guardias = () => {
             key: 'fechaFin',
             render: (_, record) => (`${moment(record.fechaFin).format('DD/MM/YYYY')}`),
         },
-        /*{
-            title: 'Acciones',
-            key: 'acciones',
-            render: (_, record) => (
-                <>
-                    <Button type="primary" onClick={() => handleView(record.id)} icon={<SolutionOutlined />}>
-                        Ver
-                    </Button>
-                    <Button danger onClick={() => handleDelete(record.id)} style={{ marginLeft: '8px' }} icon={<DeleteOutlined />}>
-                        Eliminar
-                    </Button>
-                </>
-            ),
-        },*/
     ];
 
     const colsFormGuardias = [
