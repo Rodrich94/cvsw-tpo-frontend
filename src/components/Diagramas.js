@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Select, Modal, Form, DatePicker, notification, Spin } from 'antd';
+import { EyeOutlined,DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import moment from 'moment';
@@ -190,8 +191,8 @@ const Diagramas = () => {
             key: 'acciones',
             render: (_, record) => (
                 <>
-                    <Button type="primary" onClick={() => handleView(record.id)}>Ver</Button>
-                    <Button type="danger" onClick={() => handleDelete(record.id)} style={{ marginLeft: '8px' }}>Eliminar</Button>
+                    <Button type="primary" onClick={() => handleView(record.id)}><EyeOutlined />Ver</Button>
+                    <Button type="" onClick={() => handleDelete(record.id)} style={{ marginLeft: '8px', color: 'red' }}><DeleteOutlined /></Button>
                 </>
             ),
         },

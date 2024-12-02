@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Input, DatePicker, Select, notification } from 'antd';
+import { EyeOutlined,DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import moment from 'moment';
 
@@ -177,10 +178,10 @@ const Traslados = () => {
             render: (_, record) => (
                 <>
                     <Button type="primary" onClick={() => handleView(record.id)}>
-                        Ver
+                        <EyeOutlined />Ver
                     </Button>
-                    <Button type="danger" onClick={() => handleDelete(record.id)} style={{ marginLeft: '8px' }}>
-                        Eliminar
+                    <Button type="" onClick={() => handleDelete(record.id)} style={{ marginLeft: '8px', color:'red' }}>
+                        <DeleteOutlined />
                     </Button>
                 </>
             ),
