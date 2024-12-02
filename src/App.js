@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { CalendarOutlined, LaptopOutlined, MedicineBoxOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
+import { CarOutlined, CalendarOutlined, UserOutlined,MedicineBoxOutlined,NotificationOutlined } from '@ant-design/icons';
 import logo from './logo192.png';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
 import Traslados from './components/Traslados'; 
@@ -66,10 +66,10 @@ const App = () => {
               <Menu.Item key="1" icon={<UserOutlined />}>
                 <Link to="/">Inicio</Link>
               </Menu.Item>
-              <Menu.Item key="2" icon={<LaptopOutlined />}>
+              <Menu.Item key="2" icon={<CarOutlined />}>
                 <Link to="/traslados">Traslados</Link>
               </Menu.Item>
-              <Menu.Item key="3" icon={<NotificationOutlined />}>
+              <Menu.Item key="3" icon={<CalendarOutlined />}>
                 <Link to="/diagramas">Diagramas</Link>
               </Menu.Item>
               <Menu.Item key="4" icon={<MedicineBoxOutlined />}>

@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Select, Modal, Form, DatePicker, notification } from 'antd';
+import { Table, Button, Select, Modal, Form, DatePicker, notification, Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
+import moment from 'moment';
 const { Option } = Select;
 
 const Diagramas = () => {
     const [diagramas, setDiagramas] = useState([]);
+    const [establecimientos, setEstablecimientos] = useState([]);
     const [servicios, setServicios] = useState([]);
+    const [selectedEstablecimiento, setSelectedEstablecimiento] = useState(null);
     const [selectedServicio, setSelectedServicio] = useState(null);
-    const [fechaInicio, setFechaInicio] = useState(null);
-    const [fechaFin, setFechaFin] = useState(null);
+    const [selectedMes, setSelectedMes] = useState(null);
+    const [selectedAnio, setSelectedAnio] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [loading, setLoading] = useState(false); // Estado de carga
     const [form] = Form.useForm();
     const navigate = useNavigate();
 
     const fetchAllDiagramas = async () => {
+        setLoading(true); // Activar el spinner de carga
         try {
             const response = await axios.get('http://127.0.0.1:5000/diagramas');
             setDiagramas(response.data);
@@ -24,94 +28,112 @@ const Diagramas = () => {
                 message: 'Error',
                 description: error.response?.data?.error || 'Error al obtener los diagramas.',
             });
+        } finally {
+            setLoading(false); // Desactivar el spinner después de la carga
         }
     };
 
     const fetchFilteredDiagramas = async () => {
+        setLoading(true); // Activar el spinner de carga
         try {
             const params = {};
-            
-            if (selectedServicio) {
-                params.servicio_id = selectedServicio;
-            }
+            if (selectedServicio) params.servicio_id = selectedServicio;
+            if (selectedMes) params.mes = selectedMes;
+            if (selectedAnio) params.anio = selectedAnio;
 
-
-            if (fechaInicio) {
-                params.fecha_ini = fechaInicio.format('YYYY-MM-DD'); 
-            }
-
-            if (fechaFin) {
-                params.fecha_fin = fechaFin.format('YYYY-MM-DD'); 
-            }
-
-            const response = await axios.get('http://127.0.0.1:5000/diagramas/filtrados', {
-                params: params,
-            });
-            
+            const response = await axios.get('http://127.0.0.1:5000/diagramas/filtrados', { params });
             setDiagramas(response.data);
         } catch (error) {
             notification.error({
                 message: 'Error',
                 description: error.response?.data?.error || 'Error al obtener los diagramas filtrados.',
             });
+        } finally {
+            setLoading(false); // Desactivar el spinner después de la carga
         }
     };
 
-    const fetchServicios = async () => {
+    const fetchEstablecimientos = async () => {
+        setLoading(true); // Activar el spinner de carga
         try {
-            const response = await axios.get('http://127.0.0.1:5000/servicios');
+            const response = await axios.get('http://127.0.0.1:5000/establecimientos');
+            setEstablecimientos(response.data);
+        } catch (error) {
+            notification.error({
+                message: 'Error',
+                description: error.response?.data?.error || 'Error al obtener los establecimientos.',
+            });
+        } finally {
+            setLoading(false); // Desactivar el spinner después de la carga
+        }
+    };
+
+    const fetchServiciosByEstablecimiento = async (establecimientoId) => {
+        setLoading(true); // Activar el spinner de carga
+        try {
+            const response = await axios.get(`http://127.0.0.1:5000/establecimientos/${establecimientoId}/servicios`);
             setServicios(response.data);
         } catch (error) {
             notification.error({
                 message: 'Error',
-                description: error.response?.data?.error || 'Error al obtener los servicios.',
+                description: error.response?.data?.error || 'Error al obtener los servicios para el establecimiento.',
             });
+        } finally {
+            setLoading(false); // Desactivar el spinner después de la carga
         }
     };
 
     useEffect(() => {
-        fetchServicios(); // Obtén servicios solo una vez
-        fetchAllDiagramas(); // Obtén todos los diagramas al cargar el componente
+        fetchEstablecimientos();
+        fetchAllDiagramas();
     }, []);
 
-    useEffect(() => {
-        if (selectedServicio || fechaInicio || fechaFin) {
-            fetchFilteredDiagramas(); // Obtén diagramas filtrados si hay algún filtro aplicado
-        } else {
-            fetchAllDiagramas(); // Si no hay filtros, obtén todos los diagramas
-        }
-    }, [selectedServicio, fechaInicio, fechaFin]);
+    const handleEstablecimientoChange = (value) => {
+        setSelectedEstablecimiento(value);
+        setSelectedServicio(null); // Reset servicio when establecimiento changes
+        fetchServiciosByEstablecimiento(value); // Fetch services based on the selected establecimiento
+    };
 
     const handleServicioChange = (value) => {
-        setSelectedServicio(value); // Actualiza el estado con el servicio seleccionado
+        setSelectedServicio(value);
     };
 
-
-    const handleFechaInicioChange = (date) => {
-        setFechaInicio(date); // Actualiza el estado con la fecha de inicio seleccionada
+    const handleMesChange = (date) => {
+        setSelectedMes(date ? date.month() + 1 : null); // Los meses empiezan en 0, así que sumamos 1
     };
 
-    const handleFechaFinChange = (date) => {
-        setFechaFin(date); // Actualiza el estado con la fecha de fin seleccionada
+    const handleAnioChange = (date) => {
+        setSelectedAnio(date ? date.year() : null);
+    };
+
+    const handleApplyFilters = () => {
+        fetchFilteredDiagramas();
+    };
+
+    const handleClearFilters = () => {
+        setSelectedEstablecimiento(null);
+        setSelectedServicio(null);
+        setSelectedMes(null);
+        setSelectedAnio(null);
+        setServicios([]);
+        fetchAllDiagramas();
     };
 
     const handleAdd = async (values) => {
+        setLoading(true); // Activar el spinner de carga
         try {
-            // Extraer año y mes del picker y convertirlos a números
             const anio = values.anio.year();
-            const mes = values.mes.month() + 1; // Los meses en DatePicker empiezan en 0, así que sumamos 1
-    
-            await axios.post('http://127.0.0.1:5000/diagrama', {
-                anio: anio,
-                mes: mes,
+            const mes = values.mes.month() + 1;
+
+            await axios.post('http://127.0.0.1:5000/diagrama', {                
+                anio,
+                mes,
                 servicio_id: values.servicio_id,
             });
-    
-            // Vuelve a obtener todos los diagramas después de agregar uno nuevo
+
             fetchAllDiagramas();
             setIsModalVisible(false);
             form.resetFields();
-    
             notification.success({
                 message: 'Diagrama creado',
                 description: 'El diagrama se ha creado exitosamente.',
@@ -121,13 +143,16 @@ const Diagramas = () => {
                 message: 'Error',
                 description: error.response?.data?.error || 'Error al crear el diagrama.',
             });
+        } finally {
+            setLoading(false); // Desactivar el spinner después de la carga
         }
     };
 
     const handleDelete = async (id) => {
+        setLoading(true); // Activar el spinner de carga
         try {
             await axios.delete(`http://127.0.0.1:5000/diagrama/${id}`);
-            fetchAllDiagramas(); // Vuelve a obtener todos los diagramas después de eliminar uno
+            fetchAllDiagramas();
             notification.success({
                 message: 'Diagrama eliminado',
                 description: `El Diagrama con ID ${id} se ha eliminado exitosamente.`,
@@ -137,6 +162,8 @@ const Diagramas = () => {
                 message: 'Error',
                 description: error.response?.data?.error || 'Error al eliminar el Diagrama.',
             });
+        } finally {
+            setLoading(false); // Desactivar el spinner después de la carga
         }
     };
 
@@ -144,37 +171,13 @@ const Diagramas = () => {
         navigate(`/diagrama/${id}`);
     };
 
-    const styles = {
-        container: {
-            position: 'relative',
-            padding: '20px',
-            height: '82vh',
-            backgroundImage: 'url("/fondo-salud.jpg")', // Ruta de la imagen de fondo
-            backgroundSize: 'cover',
-            color: '#fff',
-        },
-        overlay: {
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.2)', // Color y opacidad del overlay
-            zIndex: 1,
-            padding: '25px',
-        },
-        content: {
-            position: 'relative',
-            zIndex: 2, 
-        },
-    };
-
     const columns = [
         { title: 'Fecha Inicio', dataIndex: 'fecha_ini', key: 'fecha_ini' },
         { title: 'Fecha Fin', dataIndex: 'fecha_fin', key: 'fecha_fin' },
         { title: 'Servicio', dataIndex: 'servicio', key: 'servicio' },
-        { 
-            title: 'Tipo actividad', 
+        { title: 'Establecimiento', dataIndex: 'establecimiento', key: 'establecimiento' },
+        {
+            title: 'Tipo actividad',
             key: 'tipo_actividad',
             render: (_, record) => (
                 record.actividades_extraordinarias.length > 0 
@@ -194,83 +197,196 @@ const Diagramas = () => {
         },
     ];
 
+    const styles = {
+        container: {
+            position: 'relative',
+            padding: '20px',
+            height: '82vh',
+            backgroundImage: 'url("/fondo-salud.jpg")',
+            backgroundSize: 'cover',
+            color: '#fff',
+        },
+        overlay: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            zIndex: 1,
+            padding: '25px',
+        },
+        content: {
+            position: 'relative',
+            zIndex: 2,
+        },
+    };
+
     return (
         <div style={styles.container}>
-            <div style={styles.overlay}>
-                {/* Filtro por Servicio */}
-                <Select
-                    placeholder="Filtrar por Servicio"
-                    style={{ width: 200, margin: '15px 15px 15px 0px', padding: '0px', minHeight: '40px' }}
-                    onChange={handleServicioChange}
-                    allowClear
-                >
-                    {servicios.map((servicio) => (
-                        <Option key={servicio.id} value={servicio.id}>
-                            {servicio.establecimiento} - {servicio.nombre}
-                        </Option>
-                    ))}
-                </Select>
+            {/* Mostrar el spinner mientras loading es verdadero */}
+            {loading ? (
+                <Spin size="large" style={{ display: 'block', margin: '0 auto', marginTop: '20px' }} />
+            ) : (
+                <div style={styles.overlay}>
+                    <Button
+                        type="primary"
+                        onClick={() => setIsModalVisible(true)}
+                        style={{ marginRight: '20px', padding:'20px'}}
+                    >
+                        Crear Diagrama
+                    </Button>
 
-                {/* Filtro por Fecha Inicio */}
-                <DatePicker 
-                    placeholder="Mayor a:"
-                    style={{ margin: '15px', minHeight: '40px' }} 
-                    onChange={handleFechaInicioChange}
-                />
+                    <Select
+                        placeholder="Seleccionar Establecimiento"
+                        style={{ width: 200, margin: '15px 15px 15px 0px', minHeight: '40px' }}
+                        onChange={handleEstablecimientoChange}
+                        value={selectedEstablecimiento}
+                        allowClear
+                    >
+                        {establecimientos.map((establecimiento) => (
+                            <Option key={establecimiento.id} value={establecimiento.id}>
+                                {establecimiento.nombre}
+                            </Option>
+                        ))}
+                    </Select>
 
-                {/* Filtro por Fecha Fin */}
-                <DatePicker 
-                    placeholder="Menor a:"
-                    style={{ margin: '15px', minHeight: '40px' }} 
-                    onChange={handleFechaFinChange}
-                />
+                    <Select
+                        placeholder="Seleccionar Servicio"
+                        style={{ width: 200, margin: '15px' }}
+                        onChange={handleServicioChange}
+                        value={selectedServicio}
+                        disabled={!selectedEstablecimiento}
+                        allowClear
+                    >
+                        {servicios.map((servicio) => (
+                            <Option key={servicio.id} value={servicio.id}>
+                                {servicio.nombre}
+                            </Option>
+                        ))}
+                    </Select>
 
-                {/* Botón para borrar filtros */}
-                <Button type="default" onClick={() => {
-                    setSelectedServicio(null);
-                    setFechaInicio(null);
-                    setFechaFin(null);
-                }} style={{ margin: '15px', minHeight: '40px' }}>
-                    Borrar Filtros
-                </Button>
-                <Button type="primary" style={{ margin: '15px', minHeight: '40px' }} onClick={() => setIsModalVisible(true)}>Crear Diagrama</Button>
-                <Table dataSource={diagramas} columns={columns} rowKey="id" />
-            </div>    
-            <Modal
-                title="Agregar Diagrama"
-                visible={isModalVisible}
-                onCancel={() => setIsModalVisible(false)}
-                footer={null}
-            >
-                <Form form={form} onFinish={handleAdd}>
-                    {/* Campo para seleccionar el año */}
-                    <Form.Item name="anio" label="Año" rules={[{ required: true }]}>
-                        <DatePicker picker="year" placeholder="Selecciona el año" />
-                    </Form.Item>
+                    <DatePicker
+                        picker="month"
+                        placeholder="Selecciona Mes"
+                        style={{ margin: '15px' }}
+                        onChange={handleMesChange}
+                        value={selectedMes ? moment().month(selectedMes - 1) : null}
+                    />
 
-                    {/* Campo para seleccionar el mes */}
-                    <Form.Item name="mes" label="Mes" rules={[{ required: true }]}>
-                        <DatePicker picker="month" placeholder="Selecciona el mes" />
-                    </Form.Item>
+                    <DatePicker
+                        picker="year"
+                        placeholder="Selecciona Año"
+                        style={{ margin: '15px' }}
+                        onChange={handleAnioChange}
+                        value={selectedAnio ? moment().year(selectedAnio) : null}
+                    />
 
-                    {/* Campo para seleccionar el servicio */}
-                    <Form.Item name="servicio_id" label="ID Servicio" rules={[{ required: true }]}>
-                        <Select placeholder="Selecciona un servicio">
-                            {servicios.map((servicio) => (
-                                <Option key={servicio.id} value={servicio.id}>{servicio.establecimiento} - {servicio.nombre}</Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
+                    <Button type="primary" onClick={handleApplyFilters} style={{ margin: '15px', backgroundColor:'green'}}>
+                        Filtrar
+                    </Button>
 
-                    {/* Botón de guardar */}
-                    <Form.Item>
-                        <Button type="primary" htmlType="submit">Guardar</Button>
-                    </Form.Item>
-                </Form>
-            </Modal>
-    
+                    <Button onClick={handleClearFilters} style={{ margin: '15px' }}>
+                        Limpiar Filtros
+                    </Button>
+
+                    <Table
+                        rowKey="id"
+                        columns={columns}
+                        dataSource={diagramas}
+                        pagination={{ pageSize: 10 }}
+                    />
+
+                    <Modal
+                        title="Crear Diagrama"
+                        visible={isModalVisible}
+                        onCancel={() => setIsModalVisible(false)}
+                        footer={null}
+                    >
+                        <Form
+                            form={form}
+                            onFinish={handleAdd}
+                            layout="vertical"
+                        >
+                            <Form.Item
+                                name="establecimiento_id"
+                                label="Establecimiento"
+                                initialValue={selectedEstablecimiento}
+                                rules={[{ required: true, message: 'Selecciona un establecimiento' }]}
+                            >
+                                <Select
+                                    placeholder="Seleccionar Establecimiento"
+                                    onChange={handleEstablecimientoChange}
+                                    value={selectedEstablecimiento}
+                                    allowClear
+                                >
+                                    {establecimientos.map((establecimiento) => (
+                                        <Option key={establecimiento.id} value={establecimiento.id}>
+                                            {establecimiento.nombre}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+
+                            <Form.Item
+                                name="servicio_id"
+                                label="Servicio"
+                                rules={[{ required: true, message: 'Selecciona un servicio' }]}
+                            >
+                                <Select
+                                    placeholder="Seleccionar Servicio"
+                                    onChange={handleServicioChange}
+                                    value={selectedServicio}
+                                    disabled={!selectedEstablecimiento}
+                                    allowClear
+                                >
+                                    {servicios.map((servicio) => (
+                                        <Option key={servicio.id} value={servicio.id}>
+                                            {servicio.nombre}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+
+                            <Form.Item
+                                name="mes"
+                                label="Mes"
+                                rules={[{ required: true, message: 'Selecciona un mes' }]}
+                            >
+                                <DatePicker
+                                    picker="month"
+                                    placeholder="Selecciona Mes"
+                                    style={{ width: '100%' }}
+                                    onChange={handleMesChange}
+                                    value={selectedMes ? moment().month(selectedMes - 1) : null}
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="anio"
+                                label="Año"
+                                rules={[{ required: true, message: 'Selecciona un año' }]}
+                            >
+                                <DatePicker
+                                    picker="year"
+                                    placeholder="Selecciona Año"
+                                    style={{ width: '100%' }}
+                                    onChange={handleAnioChange}
+                                    value={selectedAnio ? moment().year(selectedAnio) : null}
+                                />
+                            </Form.Item>
+
+                            <Form.Item>
+                                <Button type="primary" htmlType="submit">Crear</Button>
+                            </Form.Item>
+                        </Form>
+                    </Modal>
+                </div>
+            )}
         </div>
     );
 };
 
 export default Diagramas;
+
+
