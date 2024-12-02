@@ -197,13 +197,38 @@ const Diagramas = () => {
         },
     ];
 
+    const styles = {
+        container: {
+            position: 'relative',
+            padding: '20px',
+            height: '82vh',
+            backgroundImage: 'url("/fondo-salud.jpg")',
+            backgroundSize: 'cover',
+            color: '#fff',
+        },
+        overlay: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            zIndex: 1,
+            padding: '25px',
+        },
+        content: {
+            position: 'relative',
+            zIndex: 2,
+        },
+    };
+
     return (
-        <div style={{ padding: '20px' }}>
+        <div style={styles.container}>
             {/* Mostrar el spinner mientras loading es verdadero */}
             {loading ? (
                 <Spin size="large" style={{ display: 'block', margin: '0 auto', marginTop: '20px' }} />
             ) : (
-                <>
+                <div style={styles.overlay}>
                     <Button
                         type="primary"
                         onClick={() => setIsModalVisible(true)}
@@ -356,7 +381,7 @@ const Diagramas = () => {
                             </Form.Item>
                         </Form>
                     </Modal>
-                </>
+                </div>
             )}
         </div>
     );
