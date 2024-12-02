@@ -7,7 +7,9 @@ const { Title } = Typography;
 const Presentacion = () => {
   return (
     <div style={styles.container}>
-      <Title level={1} style={styles.title}>GUARDIASAPP</Title>
+      <Title level={1} style={styles.title}>
+        GUARDIAS APP
+      </Title>
     </div>
   );
 };
