@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { CarOutlined, CalendarOutlined, UserOutlined } from '@ant-design/icons';
+import { CarOutlined, CalendarOutlined, UserOutlined,MedicineBoxOutlined,NotificationOutlined } from '@ant-design/icons';
 import logo from './logo192.png';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
 import Traslados from './components/Traslados'; 
 import Diagramas from './components/Diagramas'; 
 import DetalleDiagrama from './components/DetalleDiagrama';
+import Guardias from './components/Guardias';
+import Actividades from './components/Actividades';
 import Presentacion from './components/Inicio'; 
 
 const { Header, Content, Sider } = Layout;
@@ -70,6 +72,12 @@ const App = () => {
               <Menu.Item key="3" icon={<CalendarOutlined />}>
                 <Link to="/diagramas">Diagramas</Link>
               </Menu.Item>
+              <Menu.Item key="4" icon={<MedicineBoxOutlined />}>
+                <Link to="/guardias">Guardias</Link>
+              </Menu.Item>
+              <Menu.Item key="5" icon={<CalendarOutlined />}>
+                <Link to="/actividades">Actividades</Link>
+              </Menu.Item>
             </Menu>
           </Sider>
           <Layout style={{ padding: '0 24px 24px' }}>
@@ -88,6 +96,8 @@ const App = () => {
                 <Route path="/traslados" element={<Traslados />} />
                 <Route path="/diagramas" element={<Diagramas />} />
                 <Route path="/diagrama/:id" element={<DetalleDiagrama />} />
+                <Route path="/guardias" element={<Guardias />} />
+                <Route path="/actividades" element={<Actividades />} />
               </Routes>
             </Content>
           </Layout>
